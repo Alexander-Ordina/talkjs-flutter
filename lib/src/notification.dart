@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'dart:convert';
 import 'dart:isolate';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_apns_only/flutter_apns_only.dart';
@@ -286,11 +287,8 @@ Future<void> _onReceiveMessageFromPort(RemoteMessage firebaseMessage) async {
     payload: data['talkjs'],
   );
 }
-
-// The commented code is for when we will upgrade to flutter_local_notifications version 10
-void _onSelectNotification(String? payload) {
-//void _onSelectNotification(NotificationResponse details) {
-//  final payload = details.payload;
+void _onSelectNotification(NotificationResponse details) {
+ final payload = details.payload;
 
   print('📘 _onSelectNotification: $payload');
 
@@ -321,14 +319,12 @@ Future<void> registerAndroidPushNotificationHandlers(AndroidChannel androidChann
     InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
     ),
-    // The commented code is for when we will upgrade to flutter_local_notifications version 10
-    //onDidReceiveNotificationResponse: _onSelectNotification,
-    onSelectNotification: _onSelectNotification,
+    onDidReceiveNotificationResponse: _onSelectNotification,
   );
 
   _androidChannel = androidChannel;
 
-  /* The commented code is for when we will upgrade to flutter_local_notifications version 10
+
   try {
     final activeNotifications = await _flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
@@ -361,7 +357,7 @@ Future<void> registerAndroidPushNotificationHandlers(AndroidChannel androidChann
     // PlatformException is raised on Android < 6.0
     // Simply ignoring this part
   }
-  */
+  
 
   IsolateNameServer.registerPortWithName(_receivePort.sendPort, 'talkjsFCMPort');
   _receivePort.listen((message) async => await _onReceiveMessageFromPort(message));
